@@ -1,0 +1,31 @@
+name: ubuntu
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: checkout premake5
+      uses: actions/checkout@v3
+      with:
+          repository: premake/premake-core
+          path: premake-build
+
+    - name: Build premake5
+      run: |
+        cd premake-build
+        make -f Bootstrap.mak linux CONFIG=release
+        cp bin/release/premake5 ../
+        cd ..
+        rm -Rf premake-build
+
+    - name: test
+      run: ./premake5 gmake2 && make all && ./bin/test
