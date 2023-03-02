@@ -12,7 +12,8 @@ workspace "Project"
 
 	objdir(path.join(LocationDir, "obj")) -- premake adds $(configName)/$(AppName)
 	targetdir(path.join(LocationDir, "bin", "%{cfg.buildcfg}"))
-	startproject "app"
+	-- startproject "app"
+	startproject "test"
 
 group "3rd"
 	project "doctest"
@@ -27,7 +28,7 @@ project "app"
 	targetname("iplayer")
 	files { path.join(Root, "src/app/**.*") }
 	includedirs { path.join(Root, "src/lib") }
-	links { "iplayerlib" }
+	links { "lib" }
 
 project "lib"
 	kind "StaticLib"
@@ -44,7 +45,8 @@ project "test"
 	files { path.join(Root, "test/**.*") }
 	includedirs { path.join(Root, "src/lib") }
 	includedirs { path.join(Root, "3rd/doctest") }
-	links { "iplayerlib" }
+	links { "lib" }
+	debugdir (LocationDir)
 
 project "data"
 	kind "None"
