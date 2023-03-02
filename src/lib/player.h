@@ -43,6 +43,18 @@ public:
 	bool isRepeatModeActivated() const { return repeatModeActivated; }
 	void setRepeatMode(bool);
 
+	// playlist interface
+	void push_back(Track&&);
+	void insertAt(std::size_t pos, Track&& track);
+
+	void remove(std::size_t);
+	void move(std::size_t from, std::size_t to);
+
+	void removeDuplicate();
+
+	void info_tracks(std::ostream&);
+	void info_track(std::ostream&, std::size_t);
+
 private:
 	void previous(Playlist&, std::optional<std::size_t>&);
 	void next(Playlist&, std::optional<std::size_t>&);

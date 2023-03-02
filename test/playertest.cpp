@@ -25,7 +25,7 @@ struct MockMusicPlayer : iplayer::IMusicPlayer
 
 	std::function<void()> onMusicFinished;
 	std::filesystem::path path;
-	std::chrono::seconds elapsedTime;
+	std::chrono::seconds elapsedTime = 0s;
 	bool inPause = true;
 };
 
@@ -104,4 +104,59 @@ TEST_CASE("Random")
 		player.previous();
 	}
 	CHECK_EQ(paths[0], mock->path);
+}
+
+//------------------------------------------------------------------------------
+TEST_CASE("Playlist::insertAt")
+{
+	auto mock = std::make_shared<MockMusicPlayer>();
+	iplayer::Player player{mock, buildPlaylist({0, 2, 3})};
+
+	player.select(2);
+	REQUIRE_EQ(makeTrack(3).filename, mock->path);
+	player.insertAt(1, makeTrack(1));
+	player.previous();
+	REQUIRE_EQ(makeTrack(2).filename, mock->path);
+}
+
+//------------------------------------------------------------------------------
+TEST_CASE("Playlist::remove")
+{
+	auto mock = std::make_shared<MockMusicPlayer>();
+	iplayer::Player player{mock, buildPlaylist({0, 1, 2, 3})};
+
+	player.select(2);
+	REQUIRE_EQ(makeTrack(2).filename, mock->path);
+	player.remove(1);
+	player.previous();
+	REQUIRE_EQ(makeTrack(0).filename, mock->path);
+}
+
+//------------------------------------------------------------------------------
+TEST_CASE("Playlist::move")
+{
+	auto mock = std::make_shared<MockMusicPlayer>();
+	iplayer::Player player{mock, buildPlaylist({0, 1, 2, 3})};
+
+	player.select(2);
+	REQUIRE_EQ(makeTrack(2).filename, mock->path);
+	player.move(1, 2); // 0, 2, 1, 3
+	player.previous();
+	REQUIRE_EQ(makeTrack(0).filename, mock->path);
+	player.next();
+	REQUIRE_EQ(makeTrack(2).filename, mock->path);
+
+	player.move(0, 3); // 2, 1, 3, 0
+	player.next();
+	REQUIRE_EQ(makeTrack(1).filename, mock->path);
+	player.previous();
+	REQUIRE_EQ(makeTrack(2).filename, mock->path);
+
+	player.move(0, 3); // 1, 3, 0, 2
+	player.previous();
+	REQUIRE_EQ(makeTrack(0).filename, mock->path);
+	player.next();
+	REQUIRE_EQ(makeTrack(2).filename, mock->path);
+
+
 }
