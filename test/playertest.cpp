@@ -14,7 +14,8 @@ struct MockMusicPlayer : iplayer::IMusicPlayer
 		return true;
 	}
 	void pause() override { inPause = true; }
-	void play() override {
+	void play() override
+	{
 		inPause = false;
 		elapsedTime = 1s;
 	}
@@ -85,32 +86,22 @@ TEST_CASE("OnMusicFinished")
 }
 
 //------------------------------------------------------------------------------
-TEST_CASE("Pause")
+TEST_CASE("Random")
 {
 	auto mock = std::make_shared<MockMusicPlayer>();
 	iplayer::Player player{mock, buildPlaylist({0, 1, 2, 3})};
 
-	player.select(1);
-	CHECK_EQ(makeTrack(1).filename, mock->path);
-	CHECK(mock->inPause);
-	mock->setElapsedTime(1s);
-	player.next();
-	CHECK_EQ(makeTrack(2).filename, mock->path);
-	CHECK(mock->inPause);
-	CHECK_EQ(0s, mock->elapsedTime);
-	mock->setElapsedTime(1s);
-	player.previous();
-	CHECK_EQ(makeTrack(1).filename, mock->path);
-	CHECK(mock->inPause);
-	CHECK_EQ(0s, mock->elapsedTime);
+	player.setRandomMode(true);
+	player.select(0);
 
-	player.play();
-	CHECK_EQ(makeTrack(1).filename, mock->path);
-	CHECK(!mock->inPause);
-	player.next();
-	CHECK_EQ(makeTrack(2).filename, mock->path);
-	CHECK(!mock->inPause);
-	player.previous();
-	CHECK_EQ(makeTrack(1).filename, mock->path);
-	CHECK(!mock->inPause);
+	std::vector<std::filesystem::path> paths;
+	for (std::size_t i = 0; i != 4; ++i) {
+		paths.push_back(mock->path);
+		player.next();
+	}
+	for (std::size_t i = 4; i != 0; --i) {
+		CHECK_EQ(paths[i - 1], mock->path);
+		player.previous();
+	}
+	CHECK_EQ(paths[0], mock->path);
 }

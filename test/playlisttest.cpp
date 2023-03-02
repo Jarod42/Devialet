@@ -13,8 +13,8 @@ std::vector<int> getOrder(const iplayer::Playlist& p)
 	std::vector<int> res(p.getTracks().size());
 
 	std::transform(
-		p.getTracks().begin(), p.getTracks().end(), res.begin(), [](const auto& track) -> int {
-			return static_cast<int>(track.duration.count());
+		p.getTracks().begin(), p.getTracks().end(), res.begin(), [](const auto& p) -> int {
+			return static_cast<int>(p.second.duration.count());
 		});
 	return res;
 }

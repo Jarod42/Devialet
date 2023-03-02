@@ -18,11 +18,14 @@ public:
 
 	void removeDuplicate();
 
-	const std::vector<Track>& getTracks() const { return tracks; }
+	const std::vector<std::pair<std::size_t, Track>>& getTracks() const { return tracks; }
+
+	void shuffle();
 
 	void info(std::ostream&) const;
 
 private:
-	std::vector<Track> tracks;
+	std::size_t counter = 0; // Used for unique ID
+	std::vector<std::pair<std::size_t, Track>> tracks;
 };
 } // namespace iplayer

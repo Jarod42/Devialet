@@ -36,23 +36,28 @@ public:
 	void next();
 
 	void select(std::size_t);
-#if 0
+
 	bool getRandomMode() const { return randomModeActivated; }
 	void setRandomMode(bool);
-#endif
+
 	bool isRepeatModeActivated() const { return repeatModeActivated; }
 	void setRepeatMode(bool);
+
+private:
+	void previous(Playlist&, std::optional<std::size_t>&);
+	void next(Playlist&, std::optional<std::size_t>&);
+	void prepareRandomMode();
 
 private:
 	std::recursive_mutex mutex;
 	std::shared_ptr<IMusicPlayer> musicPlayer;
 	std::optional<std::size_t> currentSelectionIndex;
+	std::optional<std::size_t> currentRandomSelectionIndex;
 	bool playing = false;
-	Playlist playlist;
+	Playlist displayedPlaylist;
+	Playlist randomOrderPlaylist;
 	std::atomic<bool> repeatModeActivated = false;
-#if 0
 	std::atomic<bool> randomModeActivated = false;
-#endif
 };
 
 } // namespace iplayer

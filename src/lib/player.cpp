@@ -6,7 +6,8 @@ namespace iplayer
 //------------------------------------------------------------------------------
 Player::Player(std::shared_ptr<IMusicPlayer> musicPlayer, Playlist&& playlist) :
 	musicPlayer(std::move(musicPlayer)),
-	playlist(std::move(playlist))
+	displayedPlaylist(std::move(playlist)),
+	randomOrderPlaylist(displayedPlaylist)
 {
 	this->musicPlayer->setOnMusicFinished([=]() { next(); });
 }
@@ -17,13 +18,16 @@ void Player::play()
 	std::lock_guard l(mutex);
 	if (playing) return;
 
-	if (!currentSelectionIndex) {
-		next();
-	}
-	if (currentSelectionIndex) {
-		playing = true;
-		musicPlayer->play();
-	}
+	auto next_and_play = [this](auto& optIndex) {
+		if (!optIndex) {
+			next(); // might change optIndex
+		}
+		if (optIndex) {
+			playing = true;
+			musicPlayer->play();
+		}
+	};
+	next_and_play(randomModeActivated ? currentRandomSelectionIndex : currentSelectionIndex);
 }
 
 //------------------------------------------------------------------------------
@@ -52,26 +56,38 @@ void Player::previous()
 {
 	std::lock_guard l(mutex);
 
+	if (randomModeActivated) {
+		previous(randomOrderPlaylist, currentRandomSelectionIndex);
+	} else {
+		previous(displayedPlaylist, currentSelectionIndex);
+	}
+}
+
+//------------------------------------------------------------------------------
+void Player::previous(Playlist& playlist, std::optional<std::size_t>& optIndex)
+{
+	std::lock_guard l(mutex);
+
 	const bool wasPlaying = playing;
 	stop();
-	if (!currentSelectionIndex) {
+	if (!optIndex) {
 		if (playlist.getTracks().empty()) {
 			std::cerr << "empty playlist";
 			return;
 		}
-		if (musicPlayer->openMusic(playlist.getTracks().back().filename)) {
-			currentSelectionIndex = playlist.getTracks().size() - 1;
+		if (musicPlayer->openMusic(playlist.getTracks().back().second.filename)) {
+			optIndex = playlist.getTracks().size() - 1;
 			if (wasPlaying) {
 				play();
 			}
 			return;
 		}
 	}
-	auto index = currentSelectionIndex.value_or(playlist.getTracks().size() - 1);
+	auto index = optIndex.value_or(playlist.getTracks().size() - 1);
 	while (index != 0) {
 		--index;
-		if (musicPlayer->openMusic(playlist.getTracks()[index].filename)) {
-			currentSelectionIndex = index;
+		if (musicPlayer->openMusic(playlist.getTracks()[index].second.filename)) {
+			optIndex = index;
 			if (wasPlaying) {
 				play();
 			}
@@ -79,9 +95,9 @@ void Player::previous()
 		}
 	}
 	if (repeatModeActivated) {
-		currentSelectionIndex.reset();
+		optIndex.reset();
 		playing = wasPlaying;
-		previous();
+		previous(playlist, optIndex);
 	}
 }
 
@@ -90,26 +106,37 @@ void Player::next()
 {
 	std::lock_guard l(mutex);
 
+	if (randomModeActivated) {
+		next(randomOrderPlaylist, currentRandomSelectionIndex);
+	} else {
+		next(displayedPlaylist, currentSelectionIndex);
+	}
+}
+
+//------------------------------------------------------------------------------
+void Player::next(Playlist&playlist, std::optional<std::size_t>& optIndex)
+{
+	std::lock_guard l(mutex);
 	const bool wasPlaying = playing;
 	stop();
 	if (playlist.getTracks().empty()) {
 		return;
 	}
-	if (!currentSelectionIndex) {
-		if (musicPlayer->openMusic(playlist.getTracks()[0].filename)) {
-			currentSelectionIndex = 0;
+	if (!optIndex) {
+		if (musicPlayer->openMusic(playlist.getTracks()[0].second.filename)) {
+			optIndex = 0;
 			if (wasPlaying) {
 				play();
 			}
 			return;
 		}
 	}
-	auto index = currentSelectionIndex.value_or(0);
+	auto index = optIndex.value_or(0);
 	while (index < playlist.getTracks().size() - 1)
 	{
 		++index;
-		if (musicPlayer->openMusic(playlist.getTracks()[index].filename)) {
-			currentSelectionIndex = index;
+		if (musicPlayer->openMusic(playlist.getTracks()[index].second.filename)) {
+			optIndex = index;
 			if (wasPlaying) {
 				play();
 			}
@@ -117,9 +144,9 @@ void Player::next()
 		}
 	}
 	if (repeatModeActivated) {
-		currentSelectionIndex.reset();
+		optIndex.reset();
 		playing = wasPlaying;
-		next();
+		next(playlist, optIndex);
 	}
 }
 
@@ -127,27 +154,51 @@ void Player::next()
 void Player::select(std::size_t n)
 {
 	std::lock_guard l(mutex);
-	if (playlist.getTracks().empty()) {
+	if (displayedPlaylist.getTracks().empty()) {
 		return;
 	}
 	const bool wasPlaying = playing;
 	stop();
-	n = std::clamp(n, std::size_t(0), playlist.getTracks().size());
-	if (musicPlayer->openMusic(playlist.getTracks()[n].filename)) {
+	n = std::clamp(n, std::size_t(0), displayedPlaylist.getTracks().size());
+	if (musicPlayer->openMusic(displayedPlaylist.getTracks()[n].second.filename)) {
 		currentSelectionIndex = n;
+		if (randomModeActivated) {
+			prepareRandomMode();
+		}
 		if (wasPlaying) {
 			play();
 		}
 	}
 }
 
-#if 0
+//------------------------------------------------------------------------------
+void Player::prepareRandomMode()
+{
+	randomOrderPlaylist.shuffle();
+	if (currentSelectionIndex) {
+		const auto& [id, track] = displayedPlaylist.getTracks()[*currentSelectionIndex];
+		auto it = std::ranges::find_if(randomOrderPlaylist.getTracks(),
+		                               [&](const auto& p) { return p.first == id; });
+		if (it != randomOrderPlaylist.getTracks().end()) {
+			randomOrderPlaylist.move(std::distance(randomOrderPlaylist.getTracks().begin(), it), 0);
+			currentRandomSelectionIndex = 0;
+		}
+	} else {
+		currentRandomSelectionIndex.reset();
+	}
+}
+
 //------------------------------------------------------------------------------
 void Player::setRandomMode(bool value)
 {
+	std::lock_guard l(mutex);
+	
+	if (value&& randomModeActivated != value) {
+		prepareRandomMode();
+	}
 	randomModeActivated = value;
 }
-#endif
+
 //------------------------------------------------------------------------------
 void Player::setRepeatMode(bool value)
 {

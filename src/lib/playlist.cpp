@@ -1,20 +1,21 @@
 #include "playlist.h"
 
 #include <algorithm>
+#include <random>
 
 namespace iplayer
 {
 //------------------------------------------------------------------------------
 void Playlist::push_back(Track&& track)
 {
-	tracks.push_back(std::move(track));
+	tracks.emplace_back(counter++, std::move(track));
 }
 
 //------------------------------------------------------------------------------
 void Playlist::insertAt(std::size_t pos, Track&& track)
 {
 	pos = std::clamp(pos, std::size_t(0), tracks.size());
-	tracks.insert(tracks.begin() + pos, std::move(track));
+	tracks.emplace(tracks.begin() + pos, counter++, std::move(track));
 }
 
 //------------------------------------------------------------------------------
@@ -44,7 +45,7 @@ void Playlist::removeDuplicate()
 	// if order is not kept, sort+unique, but for stable remove duplicate
 	auto dest = tracks.begin();
 	for (const auto& t : tracks) {
-		if (std::find_if(tracks.begin(), dest, [&](const Track& track) { return track.filename == t.filename; }) == dest) {
+		if (std::find_if(tracks.begin(), dest, [&](const auto& p) { return p.second.filename == t.second.filename; }) == dest) {
 			*dest = t;
 			++dest;
 		}
@@ -53,10 +54,17 @@ void Playlist::removeDuplicate()
 }
 
 //------------------------------------------------------------------------------
+void Playlist::shuffle()
+{
+	static thread_local std::default_random_engine rng{std::random_device()()};
+	std::shuffle(tracks.begin(), tracks.end(), rng);
+}
+
+//------------------------------------------------------------------------------
 void Playlist::info(std::ostream& os) const
 {
 	os << "Nb tracks: " << tracks.size() << "\n";
-	for (const auto& track : tracks) {
+	for (const auto& [id, track] : tracks) {
 		os << "- " << track.title << "\n";
 	}
 }
