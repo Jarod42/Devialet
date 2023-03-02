@@ -1,27 +1,11 @@
 #include "playlist.h"
 
+#include "testutils.h"
+
 #include <doctest.h>
 
 namespace
 {
-
-//------------------------------------------------------------------------------
-iplayer::Track makeTrack(std::size_t n)
-{
-	return {.filename = "file" + std::to_string(n),
-	        .title = "Title" + std::to_string(n),
-	        .duration{std::chrono::seconds(n)}};
-}
-
-//------------------------------------------------------------------------------
-iplayer::Playlist buildPlaylist(const std::vector<std::size_t>& v)
-{
-	iplayer::Playlist res;
-	for (std::size_t n : v) {
-		res.push_back(makeTrack(n));
-	}
-	return res;
-}
 
 //------------------------------------------------------------------------------
 std::vector<int> getOrder(const iplayer::Playlist& p)
@@ -55,7 +39,6 @@ TEST_CASE("insertAt")
 	playlist.insertAt(3, makeTrack(4));
 	CHECK_EQ(std::vector{0, 1, 3, 4}, getOrder(playlist));
 }
-
 
 //------------------------------------------------------------------------------
 TEST_CASE("remove")
