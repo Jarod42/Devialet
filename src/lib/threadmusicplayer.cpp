@@ -24,7 +24,9 @@ ThreadMusicPlayer::ThreadMusicPlayer(std::ostream& os) : os(os)
 			std::lock_guard l{mutex};
 			if (elapsedTime.count() >= content.size()) {
 				elapsedTime = 0s;
-				onMusicFinished();
+				if (onMusicFinished) {
+					onMusicFinished();
+				}
 				continue;
 			}
 			this->os << content[static_cast<std::size_t>(elapsedTime.count())] << "\n";
