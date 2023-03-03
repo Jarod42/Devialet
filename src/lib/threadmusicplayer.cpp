@@ -12,7 +12,7 @@ ThreadMusicPlayer::ThreadMusicPlayer(std::ostream& os) : os(os)
 {
 	thread = std::thread([this]() {
 		while (true) {
-			for (std::size_t i = 0; i != 1; ++i) { // 5
+			for (std::size_t i = 0; i != 5; ++i) {
 				if (stop) {
 					return;
 				}
