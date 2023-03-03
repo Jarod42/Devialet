@@ -28,4 +28,8 @@ jobs:
         rm -Rf premake-build
 
     - name: test
-      run: ./premake5 gmake2 && make all && ./bin/test
+      run: |
+        ./premake5 --file=premake/premake5.lua gmake2
+        cd solution/gmake2
+        make config=release all
+        ./bin/test
