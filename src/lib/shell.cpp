@@ -33,6 +33,7 @@ void add_track(iplayer::Player& player, std::ostream& os, std::istream& is)
 		os << "Adding track " << filename << "\n";
 		player.push_back(iplayer::openTrack(filename));
 		os << "Added\n";
+		player.info_track(os, player.getTrackCount() - 1);
 	}
 	catch (const std::exception& ex) {
 		os << ex.what() << "\n";
@@ -88,6 +89,12 @@ void play(iplayer::Player& player, std::ostream& os, std::istream&)
 {
 	os << "Play\n";
 	player.play();
+	auto index = player.getSelectionIndex();
+	if (index) {
+		os << "Playing: " << player.getTrack(*index).title << "\n";
+	} else {
+		os << "Nothing to play\n";
+	}
 }
 //------------------------------------------------------------------------------
 void pause(iplayer::Player& player, std::ostream& os, std::istream&)
@@ -106,12 +113,24 @@ void next(iplayer::Player& player, std::ostream&os, std::istream&)
 {
 	os << "Next\n";
 	player.next();
+	auto index = player.getSelectionIndex();
+	if (index) {
+		os << "selection: " << player.getTrack(*index).title << "\n";
+	} else {
+		os << "No selection\n";
+	}
 }
 //------------------------------------------------------------------------------
 void previous(iplayer::Player& player, std::ostream&os, std::istream&)
 {
 	os << "Previous\n";
 	player.previous();
+	auto index = player.getSelectionIndex();
+	if (index) {
+		os << "selection: " << player.getTrack(*index).title << "\n";
+	} else {
+		os << "No selection\n";
+	}
 }
 //------------------------------------------------------------------------------
 void select(iplayer::Player& player, std::ostream& os, std::istream& is)
@@ -120,6 +139,12 @@ void select(iplayer::Player& player, std::ostream& os, std::istream& is)
 	if (is >> pos) {
 		os << "Select " << pos << "\n";
 		player.select(pos);
+		auto index = player.getSelectionIndex();
+		if (index) {
+			os << "selection: " << player.getTrack(*index).title << "\n";
+		} else {
+			os << "No selection\n";
+		}
 	} else {
 		os << "Invalid argument\n";
 	}

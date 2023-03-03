@@ -31,6 +31,8 @@ public:
 	bool isRepeatModeActivated() const { return repeatModeActivated; }
 	void setRepeatMode(bool);
 
+	std::optional<std::size_t> getSelectionIndex() const;
+
 	// playlist interface
 	void push_back(Track&&);
 	void insertAt(std::size_t pos, Track&& track);
@@ -42,6 +44,9 @@ public:
 
 	void info_tracks(std::ostream&);
 	void info_track(std::ostream&, std::size_t);
+
+	std::size_t getTrackCount() const { return displayedPlaylist.getTracks().size(); }
+	const Track& getTrack(std::size_t n) const { return displayedPlaylist.getTracks().at(n).second; }
 
 private:
 	void previous(Playlist&, std::optional<std::size_t>&);

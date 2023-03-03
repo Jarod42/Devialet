@@ -332,4 +332,18 @@ void Player::info_track(std::ostream& os, std::size_t pos)
 	}
 }
 
+//------------------------------------------------------------------------------
+std::optional<std::size_t> Player::getSelectionIndex() const
+{
+	if (randomModeActivated) {
+		if (!currentRandomSelectionIndex) {
+			return std::nullopt;
+		}
+		const auto& [id, track] = randomOrderPlaylist.getTracks()[*currentRandomSelectionIndex];
+		return pos_by_id(displayedPlaylist, id);
+	} else {
+		return currentSelectionIndex;
+	}
+}
+
 } // namespace iplayer
