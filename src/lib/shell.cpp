@@ -31,7 +31,7 @@ void add_track(iplayer::Player& player, std::ostream& os, std::istream& is)
 	is >> filename;
 	try {
 		os << "Adding track " << filename << "\n";
-		player.push_back(iplayer::openTrack(filename));
+		player.push_back(iplayer::openTrackHeader(filename));
 		os << "Added\n";
 		player.info_track(os, player.getTrackCount() - 1);
 	}

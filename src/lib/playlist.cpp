@@ -6,13 +6,13 @@
 namespace iplayer
 {
 //------------------------------------------------------------------------------
-void Playlist::push_back(Track&& track)
+void Playlist::push_back(TrackHeader&& track)
 {
 	tracks.emplace_back(counter++, std::move(track));
 }
 
 //------------------------------------------------------------------------------
-void Playlist::insertAt(std::size_t pos, Track&& track)
+void Playlist::insertAt(std::size_t pos, TrackHeader&& track)
 {
 	pos = std::clamp(pos, std::size_t(0), tracks.size());
 	tracks.emplace(tracks.begin() + pos, counter++, std::move(track));

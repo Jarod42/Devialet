@@ -1,4 +1,4 @@
-#include "track.h"
+#include "trackheader.h"
 
 #include <doctest.h>
 #include <sstream>
@@ -8,19 +8,19 @@ using namespace std::literals;
 //------------------------------------------------------------------------------
 TEST_CASE("open track")
 {
-	const iplayer::Track expected{.filename = "c:/somepath/track.txt", .title = "Some title", .duration = 42s};
+	const iplayer::TrackHeader expected{.filename = "c:/somepath/track.txt", .title = "Some title", .duration = 42s};
 
 	std::stringstream ss;
 	ss << std::quoted(expected.title) << " " << expected.duration.count();
 	
-	const iplayer::Track track = iplayer::openTrack(expected.filename, ss);
+	const iplayer::TrackHeader track = iplayer::openTrackHeader(expected.filename, ss);
 	CHECK_EQ(expected, track);
 }
 
 //------------------------------------------------------------------------------
 TEST_CASE("info")
 {
-	const iplayer::Track track{.filename = "c:/somepath/track.txt", .title = "Some title", .duration = 42s};
+	const iplayer::TrackHeader track{.filename = "c:/somepath/track.txt", .title = "Some title", .duration = 42s};
 	const std::string expected = R"(Filename: track.txt
 Title: Some title
 Duration: 42s
@@ -37,12 +37,12 @@ TEST_CASE("data")
 	// working dir is at solution/$buildsystem/
 	const std::filesystem::path dataDir = "../../data";
 
-	CHECK_NOTHROW(iplayer::openTrack(dataDir / "track1.txt"));
-	CHECK_NOTHROW(iplayer::openTrack(dataDir / "track2.txt"));
-	CHECK_NOTHROW(iplayer::openTrack(dataDir / "track3.txt"));
-	CHECK_NOTHROW(iplayer::openTrack(dataDir / "track4.txt"));
+	CHECK_NOTHROW(iplayer::openTrackHeader(dataDir / "track1"));
+	CHECK_NOTHROW(iplayer::openTrackHeader(dataDir / "track2"));
+	CHECK_NOTHROW(iplayer::openTrackHeader(dataDir / "track3"));
+	CHECK_NOTHROW(iplayer::openTrackHeader(dataDir / "track4"));
 
-	CHECK_THROWS(iplayer::openTrack(dataDir / "not-exist.txt"));
-	CHECK_THROWS(iplayer::openTrack(dataDir / "invalid1.txt"));
-	CHECK_THROWS(iplayer::openTrack(dataDir / "invalid2.txt"));
+	CHECK_THROWS(iplayer::openTrackHeader(dataDir / "not-exist"));
+	CHECK_THROWS(iplayer::openTrackHeader(dataDir / "invalid1"));
+	CHECK_THROWS(iplayer::openTrackHeader(dataDir / "invalid2"));
 }

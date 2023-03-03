@@ -8,18 +8,18 @@
 namespace iplayer
 {
 
-struct Track
+struct TrackHeader
 {
 	std::filesystem::path filename;
 	std::string title;
 	std::chrono::seconds duration;
 	// other metadata (codec, album, ID3vx, Lyrics...)
 
-	bool operator==(const Track&) const = default;
+	bool operator==(const TrackHeader&) const = default;
 };
 
-Track openTrack(const std::filesystem::path&);
-Track openTrack(const std::filesystem::path&, std::istream&);
-void infoTrack(std::ostream&, const Track&);
+TrackHeader openTrackHeader(const std::filesystem::path&);
+TrackHeader openTrackHeader(const std::filesystem::path&, std::istream&);
+void infoTrack(std::ostream&, const TrackHeader&);
 
 } // namespace iplayer

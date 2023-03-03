@@ -248,10 +248,10 @@ void Player::setRepeatMode(bool value)
 }
 
 //------------------------------------------------------------------------------
-void Player::push_back(Track&& track)
+void Player::push_back(TrackHeader&& track)
 {
 	std::lock_guard l(mutex);
-	displayedPlaylist.push_back(Track(track));
+	displayedPlaylist.push_back(TrackHeader(track));
 	randomOrderPlaylist.push_back(std::move(track));
 	if (randomModeActivated && currentRandomSelectionIndex) {
 		randomOrderPlaylist.move(
@@ -260,10 +260,10 @@ void Player::push_back(Track&& track)
 	}
 }
 //------------------------------------------------------------------------------
-void Player::insertAt(std::size_t pos, Track&& track)
+void Player::insertAt(std::size_t pos, TrackHeader&& track)
 {
 	std::lock_guard l(mutex);
-	displayedPlaylist.insertAt(pos, Track(track));
+	displayedPlaylist.insertAt(pos, TrackHeader(track));
 	if (currentSelectionIndex && pos <= currentSelectionIndex) {
 		++*currentSelectionIndex;
 	}
