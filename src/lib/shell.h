@@ -10,10 +10,12 @@ namespace iplayer
 	class Shell
 	{
 	public:
-		explicit Shell(std::shared_ptr<Player> player) : player(std::move(player)) {}
-		void run(std::istream& is, std::ostream& os);
+		Shell(std::shared_ptr<Player>, std::istream&, std::ostream&);
+		void run();
 
 	private:
 		std::shared_ptr<Player> player;
+		std::istream& is;
+		std::ostream& os;
 	};
 }

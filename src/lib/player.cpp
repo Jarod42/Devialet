@@ -35,7 +35,19 @@ Player::Player(std::shared_ptr<IMusicPlayer> musicPlayer, Playlist&& playlist) :
 	displayedPlaylist(std::move(playlist)),
 	randomOrderPlaylist(displayedPlaylist)
 {
-	this->musicPlayer->setOnMusicFinished([=]() { next(); });
+	this->musicPlayer->setOnMusicFinished([=]() {
+		next();
+		if (onMusicChanged) {
+			onMusicChanged();
+		}
+	});
+}
+
+//------------------------------------------------------------------------------
+void Player::setOnMusicChanged(std::function<void()> f)
+{
+	std::lock_guard l(mutex);
+	onMusicChanged = f;
 }
 
 //------------------------------------------------------------------------------
@@ -100,6 +112,9 @@ void Player::previous(Playlist& playlist, std::optional<std::size_t>& optIndex)
 		return;
 	}
 	if (!optIndex) {
+		if (randomModeActivated) {
+			prepareRandomMode();
+		}
 		if (musicPlayer->openMusic(playlist.getTracks().back().second.filename)) {
 			optIndex = playlist.getTracks().size() - 1;
 			if (wasPlaying) {
@@ -148,6 +163,9 @@ void Player::next(Playlist& playlist, std::optional<std::size_t>& optIndex)
 		return;
 	}
 	if (!optIndex) {
+		if (randomModeActivated) {
+			prepareRandomMode();
+		}
 		if (musicPlayer->openMusic(playlist.getTracks()[0].second.filename)) {
 			optIndex = 0;
 			if (wasPlaying) {

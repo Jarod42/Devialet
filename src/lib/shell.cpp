@@ -214,8 +214,23 @@ void showHelp(iplayer::Player&, std::ostream& os, std::istream&)
 namespace iplayer
 {
 
+
 //------------------------------------------------------------------------------
-void Shell::run(std::istream& is, std::ostream& os)
+Shell::Shell(std::shared_ptr<Player> player, std::istream& is, std::ostream& os) :
+	player(std::move(player)),
+	is(is),
+	os(os)
+{
+	this->player->setOnMusicChanged([this]() {
+		if (auto index = this->player->getSelectionIndex()) {
+			const auto& track = this->player->getTrack(*index);
+			this->os << "Switcing to: " << track.title << "\n";
+		}
+	});
+}
+
+//------------------------------------------------------------------------------
+void Shell::run()
 {
 	os << "Imaginary player\n";
 	{

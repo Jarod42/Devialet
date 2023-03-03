@@ -16,6 +16,8 @@ class Player
 public:
 	Player(std::shared_ptr<IMusicPlayer>, Playlist&& playlist);
 
+	void setOnMusicChanged(std::function<void()>);
+
 	void play();
 	void pause();
 	void stop();
@@ -55,6 +57,7 @@ private:
 
 private:
 	std::recursive_mutex mutex;
+	std::function<void()> onMusicChanged;
 	std::shared_ptr<IMusicPlayer> musicPlayer;
 	std::optional<std::size_t> currentSelectionIndex;
 	std::optional<std::size_t> currentRandomSelectionIndex;
