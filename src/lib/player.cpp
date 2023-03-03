@@ -96,11 +96,10 @@ void Player::previous(Playlist& playlist, std::optional<std::size_t>& optIndex)
 
 	const bool wasPlaying = playing;
 	stop();
+	if (playlist.getTracks().empty()) {
+		return;
+	}
 	if (!optIndex) {
-		if (playlist.getTracks().empty()) {
-			std::cerr << "empty playlist";
-			return;
-		}
 		if (musicPlayer->openMusic(playlist.getTracks().back().second.filename)) {
 			optIndex = playlist.getTracks().size() - 1;
 			if (wasPlaying) {
