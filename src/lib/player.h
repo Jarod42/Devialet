@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <optional>
 #include <vector>
 
 namespace iplayer

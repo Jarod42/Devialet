@@ -1,5 +1,6 @@
 #include "player.h"
 
+#include <algorithm>
 #include <cassert>
 #include <random>
 
@@ -35,7 +36,7 @@ Player::Player(std::shared_ptr<IMusicPlayer> musicPlayer, Playlist&& playlist) :
 	displayedPlaylist(std::move(playlist)),
 	randomOrderPlaylist(displayedPlaylist)
 {
-	this->musicPlayer->setOnMusicFinished([=]() {
+	this->musicPlayer->setOnMusicFinished([this]() {
 		next();
 		if (onMusicChanged) {
 			onMusicChanged();

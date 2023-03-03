@@ -1,7 +1,7 @@
 #include "trackheader.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 namespace iplayer
 {
@@ -41,7 +41,8 @@ void infoTrack(std::ostream& os, const TrackHeader& track)
 {
 	os << "Filename: " << track.filename.filename().string() << "\n"
 	   << "Title: " << track.title << "\n"
-	   << "Duration: " << track.duration << "\n";
+	   << "Duration: " << track.duration.count() << "s"
+	   << "\n";
 }
 
 } // namespace iplayer

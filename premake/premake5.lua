@@ -44,6 +44,7 @@ project "test"
 	targetname("test")
 	files { path.join(Root, "test/**.*") }
 	includedirs { path.join(Root, "src/lib") }
+	includedirs { path.join(Root, "test/") }
 	includedirs { path.join(Root, "3rd/doctest") }
 	links { "lib" }
 	debugdir (LocationDir)
