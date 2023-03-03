@@ -32,4 +32,4 @@ jobs:
         ./premake5 --file=premake/premake5.lua gmake2
         cd solution/gmake2
         make config=release all
-        ./bin/test
+        ./bin/Release/test
